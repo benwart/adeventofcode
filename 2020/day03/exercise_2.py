@@ -9,8 +9,8 @@ width = len(map[0])
 
 
 def hit_tree(row, col):
-    # print(map[row][col % width], end="")
-    return map[row][col % width] == "#"
+    check = map[row][col % width]
+    return check == "#"
 
 
 def compute_slope(right, down):
