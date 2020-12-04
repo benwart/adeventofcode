@@ -4,11 +4,11 @@ import re
 
 required_fields = ("byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid")
 field_names = required_fields + ("cid",)
-fields_regex = f"(?P<key>{'|'.join(field_names)}):(?P<value>[^\\s]+)"
+fields_regex = re.compile(f"(?P<key>{'|'.join(field_names)}):(?P<value>[^\\s]+)")
 
 
 def split_fields(line):
-    return re.findall(fields_regex, line)
+    return fields_regex.findall(line)
 
 
 def year_validator(field, value, minimum, maximum):
@@ -43,9 +43,11 @@ hgt_check = {
     "in": (59, 76),
 }
 
+hgt_regex = re.compile(r"^(?P<height>\d+)(?P<units>cm|in)$")
+
 
 def hgt(value):
-    match = re.match(r"(?P<height>\d+)(?P<units>cm|in)", value)
+    match = hgt_regex.match(value)
     if match:
         height = int(match.group("height"))
         units = match.group("units")
@@ -56,20 +58,29 @@ def hgt(value):
 
 
 # hcl (Hair Color) - a # followed by exactly six characters 0-9 or a-f.
+hcl_regex = re.compile(r"^#[0-9a-f]{6}$")
+
+
 def hcl(value):
-    match = re.match(r"#[0-9a-f]{6}", value)
+    match = re.match(hcl_regex, value)
     return match != None
 
 
 # ecl (Eye Color) - exactly one of: amb blu brn gry grn hzl oth.
+ecl_regex = re.compile(r"^(amb|blu|brn|gry|grn|hzl|oth)$")
+
+
 def ecl(value):
-    match = re.match(r"amb|blu|brn|gry|grn|hzl|oth", value)
+    match = ecl_regex.match(value)
     return match != None
 
 
 # pid (Passport ID) - a nine-digit number, including leading zeroes.
+pid_regex = re.compile(r"^[0-9]{9}$")
+
+
 def pid(value):
-    match = re.match(r"^[0-9]{9}$", value)
+    match = pid_regex.match(value)
     return match != None
 
 
