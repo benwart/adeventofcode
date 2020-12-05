@@ -10,10 +10,10 @@
 			"path": "day03"
 		},
 		{
-			"path": ".."
+			"path": "day04"
 		},
 		{
-			"path": "day04"
+			"path": "day05"
 		}
 	],
 	"settings": {}
