@@ -33,54 +33,33 @@ So, in this example, the number of bag colors that can eventually contain at lea
 How many bag colors can eventually contain at least one shiny gold bag? (The list of rules is quite long; make sure you get all of it.)
 """
 
-import re
 from collections import deque
+from parser import parse
 
-rules_regex = re.compile(r"(?P<outer>.*)\s+contain\s(?P<inner>.*)\.$")
-bag_color_regex = re.compile(r"(\d+\s+)?(?P<color>.*)\s+bag(s)?")
-
-
-def split_inner_rules(inner_rules):
-    inner_rules = []
-    if not "no other bags" in groups["inner"]:
-        inner_rules = tuple(groups["inner"].split(", "))
-
-    return inner_rules
-
-
-rules = {}
-
-with open("./data/full") as f:
-    for line in f:
-        match = rules_regex.match(line.rstrip())
-        if match:
-            groups = match.groupdict()
-            outer_bag = groups["outer"]
-            inner_bags = split_inner_rules(groups["inner"])
-            rules[outer_bag] = inner_bags
-        else:
-            print(f"No Match found: {line.rstrip()}")
-
+rules = parse("./data/full")
 
 # search for bags that hold gold shiny bags
-def search(rules, color, output):
+def search_inner(color, rules):
+    for inner in rules:
+        if color in inner.color:
+            return True
+
+
+def search_outer(color, output):
     for outer in rules.keys():
         item = (outer, rules[outer])
-        for inner in rules[outer]:
-            if color in inner:
-                if item not in output:
-                    output.add(item)
-                    match = bag_color_regex.match(outer)
-                    outer_color = match.group("color")
-                    searches.append((rules, outer_color, output))
+        if item not in output:
+            if search_inner(color, rules[outer]):
+                output.add(item)
+                searches.append((outer, output))
 
 
 output = set()
-searches = [(rules, "shiny gold", output)]
+searches = [("shiny gold", output)]
 
 while len(searches) > 0:
     s = searches.pop()
-    search(*s)
+    search_outer(*s)
 
-print(output)
+# print(output)
 print(len(output))

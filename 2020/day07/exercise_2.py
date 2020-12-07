@@ -30,60 +30,23 @@ In this example, a single shiny gold bag must contain 126 other bags.
 How many individual bags are required inside your single shiny gold bag?
 """
 
-import re
-from collections import namedtuple
+from parser import parse
 from functools import cache
 
-rules_regex = re.compile(r"(?P<outer>.*)\s+bags\s+contain\s(?P<inner>.*)\.$")
-bag_color_regex = re.compile(r"((?P<count>\d+)\s+)?(?P<color>.*)\s+bag(s)?")
-Rule = namedtuple("Rule", ("key", "inner"))
-InnerRule = namedtuple("InnerRule", ("count", "color"))
 
-
-def get_inner_rule(inner):
-    match = bag_color_regex.match(inner).groupdict()
-    return InnerRule(int(match["count"]), match["color"])
-
-
-def split_inner_rules(inner_rules):
-    inner_rules = tuple()
-    if not "no other bags" in groups["inner"]:
-        inner_rules = tuple(
-            map(
-                lambda i: get_inner_rule(i),
-                groups["inner"].split(", "),
-            )
-        )
-
-    return inner_rules
-
-
-rules = {}
-
-with open("./data/full") as f:
-    for line in f:
-        match = rules_regex.match(line.rstrip())
-        if match:
-            groups = match.groupdict()
-            outer_bag = groups["outer"]
-            inner_bags = split_inner_rules(groups["inner"])
-            rules[outer_bag] = inner_bags
-        else:
-            print(f"No Match found: {line.rstrip()}")
+rules = parse("./data/full")
 
 
 @cache
 def recurse_count(key, inner_rules):
-    # print(f"{key} with {inner_rules}")
-    count = 1
-    for inner in inner_rules:
-        count += inner.count * recurse_count(inner.color, rules[inner.color])
+    count = 1 + sum(
+        i.count * recurse_count(i.color, rules[i.color]) for i in inner_rules
+    )
+
     return count
 
 
 # print(rules)
-
-shiny_gold = ("shiny_gold", rules["shiny gold"])
-count = recurse_count(*shiny_gold)
+count = recurse_count("shiny_gold", rules["shiny gold"])
 
 print(count - 1)
