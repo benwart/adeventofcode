@@ -42,12 +42,17 @@ Fix the program so that it terminates normally by changing exactly one jmp (to n
 from parser import instructions
 
 
-def switch(op):
-    if op == "jmp":
-        return "nop"
-    if op == "nop":
-        return "jmp"
-    return op
+swap_op = {
+    "jmp": "nop",
+    "nop": "jmp",
+    "acc": "acc",
+}
+
+
+def switch(instruction):
+    i = instruction.copy()
+    i["op"] = swap_op[i["op"]]
+    return i
 
 
 def nop(n, i, a):
@@ -79,21 +84,16 @@ def run(program, swap=None):
     visited = set()
 
     while True:
-        # get instruction from program
         instruction = program[index]
-
-        if index == swap:
-            instruction["op"] = switch(instruction["op"])
-            # print(f"{index}: {instruction} (swap)")
-
-        # print(f"{index} ({accumulator}): {instruction}")
 
         if index in visited:
             return (False, f"Found Cycle. ACC: {accumulator}", visited)
 
         visited.add(index)
 
-        # handle instruction
+        if index == swap:
+            instruction = switch(instruction)
+
         index, accumulator = operations[instruction["op"]](
             instruction["value"], index, accumulator
         )
@@ -117,8 +117,7 @@ sorted_visited = sorted(failed_visited)
 for v in sorted_visited:
     o = original[v]
     if o["op"] in ["jmp", "nop"]:
-        # print(f"{v}: {o['op']} => {switch(o['op'])}")
-        done, message, visited = run([i for i in instructions("./data/full")], v)
+        done, message, visited = run(original, v)
         if done:
             print(message)
             break
