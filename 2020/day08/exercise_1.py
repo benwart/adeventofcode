@@ -55,26 +55,21 @@ Run your copy of the boot code. Immediately before any instruction is executed a
 
 from parser import instructions
 
-index = 0
-accumulator = 0
-program = [i for i in instructions("./data/full")]
-visited = set()
 
-# print(program)
+def nop(n, i, a):
+    i += 1
+    return i, a
 
 
-def nop(n):
-    pass
+def acc(n, i, a):
+    a += n
+    i += 1
+    return i, a
 
 
-def acc(n):
-    global accumulator
-    accumulator += n
-
-
-def jmp(n):
-    global index
-    index += n
+def jmp(n, i, a):
+    i += n
+    return i, a
 
 
 operations = {
@@ -83,11 +78,17 @@ operations = {
     "jmp": jmp,
 }
 
+index = 0
+accumulator = 0
+program = [i for i in instructions("./data/full")]
+visited = set()
+
+# print(program)
 
 while True:
     # get instruction from program
     i = program[index]
-    print(i)
+    # print(i)
 
     if index in visited:
         print(f"Found Cycle. ACC: {accumulator}")
@@ -96,7 +97,4 @@ while True:
     visited.add(index)
 
     # handle instruction
-    operations[i["op"]](i["value"])
-
-    if i["op"] != "jmp":
-        index += 1
+    index, accumulator = operations[i["op"]](i["value"], index, accumulator)

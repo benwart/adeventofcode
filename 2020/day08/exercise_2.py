@@ -51,11 +51,13 @@ def switch(op):
 
 
 def nop(n, i, a):
+    i += 1
     return i, a
 
 
 def acc(n, i, a):
     a += n
+    i += 1
     return i, a
 
 
@@ -95,9 +97,6 @@ def run(program, swap=None):
         index, accumulator = operations[instruction["op"]](
             instruction["value"], index, accumulator
         )
-
-        if instruction["op"] != "jmp":
-            index += 1
 
         if len(program) <= index:
             return (
