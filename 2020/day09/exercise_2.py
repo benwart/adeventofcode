@@ -34,14 +34,14 @@ To find the encryption weakness, add together the smallest and largest number in
 What is the encryption weakness in your XMAS-encrypted list of numbers?
 """
 
-import sys
 from collections import namedtuple
 from parser import parse_ints
+from typing import Iterable
 
 data = [i for i in parse_ints("./data/full")]
 
 
-def check(data, value) -> bool:
+def check(data: Iterable[int], value: int) -> bool:
     for a in range(0, len(data) - 1):
         for b in range(1, len(data)):
             # print(f"{data[a]} + {data[b]}")
@@ -50,7 +50,7 @@ def check(data, value) -> bool:
     return False
 
 
-def find_number(data, preamble=25):
+def find_number(data: Iterable[int], preamble: int = 25):
     for i in range(preamble, len(data)):
         c = check(data[i - preamble : i + preamble], data[i])
         if not c:
@@ -66,13 +66,16 @@ finish = 0
 acc = 0
 
 while finish < len(data):
+
     if acc < num:
         curr = data[finish]
         acc += curr
         finish += 1
+
     elif acc > num:
         acc -= data[start]
         start += 1
+
     elif acc == num:
         subset = data[start:finish]
         minimum = min(subset)

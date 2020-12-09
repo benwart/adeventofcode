@@ -49,12 +49,13 @@ In this example, after the 5-number preamble, almost every number is the sum of 
 The first step of attacking the weakness in the XMAS data is to find the first number in the list (after the preamble) which is not the sum of two of the 25 numbers before it. What is the first number that does not have this property?
 """
 
+from typing import Iterable
 from parser import parse_ints
 
 data = [i for i in parse_ints("./data/full")]
 
 
-def check(data, value) -> bool:
+def check(data: Iterable[int], value: int) -> bool:
     for a in range(0, len(data) - 1):
         for b in range(1, len(data)):
             # print(f"{data[a]} + {data[b]}")
