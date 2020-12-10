@@ -42,23 +42,23 @@ from parser import parse_ints
 data = [l for l in parse_ints("./data/full")]
 data.sort()
 data.append(max(data) + 3)
-print(data)
 
 
 @cache
 def check(begin, finish, last):
+    global data
     v = 0
 
     # find all possible next steps
     for i in range(begin, finish):
         a = data[i]
-        if a <= last + 3:
+        if a <= last + 3 and begin != finish:
             v += check(i + 1, finish, a)
         else:
             break
 
     # no more adpaters to chain
-    if len(data) - 1 == begin:
+    if begin == finish:
         v += 1
 
     return v
