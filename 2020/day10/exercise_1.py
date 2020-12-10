@@ -89,14 +89,15 @@ from parser import parse_ints
 
 data = [l for l in parse_ints("./data/full")]
 data.sort()
+data.append(max(data) + 3)
 
 input = 0
-counts = [0, 0, 1]
+counts = [None, 0, 0, 0]
 
 last = input
 for i in data:
-    counts[i - last - 1] += 1
+    counts[i - last] += 1
     last = i
 
-solution = counts[1 - 1] * counts[3 - 1]
+solution = counts[1] * counts[3]
 print(solution)
