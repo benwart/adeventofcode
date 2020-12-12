@@ -27,7 +27,6 @@ class Ferry:
         x = self.w_x
         y = self.w_y
 
-        # quarter turn
         if heading == 90:
             self.w_x = y * -1
             self.w_y = x
