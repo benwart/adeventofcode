@@ -28,7 +28,7 @@ class Ferry:
         y = self.w_y
 
         if heading == 90:
-            self.w_x = y * -1
+            self.w_x = -y
             self.w_y = x
 
         elif heading == 180:
@@ -37,7 +37,7 @@ class Ferry:
 
         elif heading == 270:
             self.w_x = y
-            self.w_y = x * -1
+            self.w_y = -x
 
     def move_forward(self, value):
         self.f_x += self.w_x * value
