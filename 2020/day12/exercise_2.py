@@ -12,14 +12,16 @@ move_cardinal = {
 
 
 class Ferry:
-    def __init__(self):
-        self.f_x = 0
-        self.f_y = 0
-        self.w_x = 10
-        self.w_y = 1
+    def __init__(self, f_x=0, f_y=0, w_x=10, w_y=1):
+        self.origin_x = f_x
+        self.origin_y = f_y
+        self.f_x = f_x
+        self.f_y = f_y
+        self.w_x = w_x
+        self.w_y = w_y
 
     def manhatten_distance(self):
-        return abs(self.f_x) + abs(self.f_y)
+        return abs(self.origin_x - self.f_x) + abs(self.origin_y - self.f_y)
 
     def rotate(self, direction, degrees):
         heading = degrees % 360 if direction == "L" else 360 - (degrees % 360)
@@ -60,7 +62,7 @@ class Ferry:
             self.move_forward(value)
 
 
-ferry = Ferry()
+ferry = Ferry(0, 0, 10, 1)
 
 for instruction in parse_instruction("./data/full"):
     ferry.execute_instruction(instruction)
