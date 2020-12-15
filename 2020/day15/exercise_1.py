@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from collections import defaultdict
+import numpy as np
 
 inputs = [
     {"numbers": [0, 3, 6], "answer": 436},
@@ -16,7 +16,7 @@ inputs = [
 input = inputs[-1]
 stop = 2020
 
-history = defaultdict(lambda: turn)
+history = np.zeros(stop, dtype=int)
 last_said = None
 
 for turn, number in enumerate(input["numbers"]):
