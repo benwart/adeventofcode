@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from collections import defaultdict
+
 inputs = [
     {"numbers": [0, 3, 6], "answer": 175594},
     {"numbers": [1, 3, 2], "answer": 2578},
@@ -14,23 +16,15 @@ inputs = [
 input = inputs[-1]
 stop = 30000000
 
-history = {}
+history = defaultdict(lambda: turn)
 last_said = None
-turn = 1
 
-for i in input["numbers"]:
-    if i not in history:
-        history[i] = turn
+for turn, number in enumerate(input["numbers"]):
+    history[last_said], last_said = turn, number
 
-    last_said = i
-    turn += 1
+for turn in range(len(input["numbers"]), stop):
+    history[last_said], last_said = turn, turn - history[last_said]
 
-for i in range(turn, stop + 1):
-    saying = ((i - 1) - history[last_said]) if last_said in history else 0
-    history[last_said] = i - 1
-    last_said = saying
-
-    if i == stop:
-        if input["answer"]:
-            print(f"{('FAIL', 'PASS')[input['answer']==last_said]}")
-        print(last_said)
+if input["answer"]:
+    print(f"{('FAIL', 'PASS')[input['answer']==last_said]}")
+print(last_said)
