@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from collections import deque
-
 inputs = [
     {"numbers": [0, 3, 6], "answer": 436},
     {"numbers": [1, 3, 2], "answer": 1},
@@ -18,28 +16,19 @@ stop = 2020
 
 history = {}
 last_said = None
-
 turn = 1
+
 for i in input["numbers"]:
     if i not in history:
-        history[i] = deque([turn], maxlen=2)
-    else:
-        history[i].append(turn)
+        history[i] = turn
 
     last_said = i
     turn += 1
 
 for i in range(turn, stop + 1):
-    h = history[last_said]
-    if len(h) == 1:
-        last_said = 0
-    else:
-        last_said = h[1] - h[0]
-
-    if last_said not in history:
-        history[last_said] = deque([i], maxlen=2)
-    else:
-        history[last_said].append(i)
+    saying = ((i - 1) - history[last_said]) if last_said in history else 0
+    history[last_said] = i - 1
+    last_said = saying
 
     if i == stop:
         if input["answer"]:
