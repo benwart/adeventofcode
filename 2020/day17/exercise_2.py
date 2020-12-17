@@ -15,13 +15,12 @@ def print_array(arr):
     np.set_printoptions(formatter=None)
 
 
-def expand_array(arr, n=1):
-    shape = arr.shape
-    width = shape[0]
-    expanded = [width + (n * 2) for d in range(len(shape))]
-    output = np.zeros(expanded, dtype=dtype)
-    output[n:-n, n:-n, n:-n] = arr
-    return output
+def expand_array(arr):
+    exp_size = tuple(i + 2 for i in arr.shape)
+    exp = np.zeros(exp_size, dtype=np.uint8)
+    nd_slice = (slice(1, -1),) * len(arr.shape)
+    exp[nd_slice] = arr
+    return exp
 
 
 def neighborhood_strides(arr):
@@ -35,36 +34,30 @@ def neighborhood_strides(arr):
     return as_strided(arr, shape=new_shape, strides=strides)
 
 
-# index is number of neighbors alive
-rules = {
-    "alive": np.zeros(26 + 1, np.uint8),
-    "dead": np.zeros(26 + 1, np.uint8),
-}
-rules["alive"][[2, 3]] = 1
-rules["dead"][3] = 1
-
-
 def init_iteration(state):
     # setup initial simulation state
-    full_size = tuple(i + 2 for i in state.shape)
-    full = np.zeros(full_size, dtype=np.uint8)
-
+    full = expand_array(state)
     nd_slice = (slice(1, -1),) * len(state.shape)
-    # self.board = self.full[1:-1,1:-1,...]
-
     board = full[nd_slice]
-    full[nd_slice] = state
     ndims = len(board.shape)
     return full, board, ndims
 
+
+# index is number of neighbors alive
+rules = {
+    "alive": np.zeros(80 + 1, np.uint8),
+    "dead": np.zeros(80 + 1, np.uint8),
+}
+rules["alive"][[2, 3]] = 1
+rules["dead"][3] = 1
 
 # fetch initial state from file
 initial = parse_initial("./data/full")
 iterations = 6
 
 # set size to make the iteratiosn easier
-state = np.zeros([initial.shape[0]] * 3, dtype=dtype)
-state[1] = initial
+state = np.zeros([initial.shape[0]] * 4, dtype=dtype)
+state[1, 1] = initial
 state = expand_array(state)
 
 for i in range(1, iterations + 1):
