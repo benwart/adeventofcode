@@ -12,7 +12,7 @@ for i in range(0, len(tiles) - 1):
     t = tiles[i]
     for j in range(i + 1, len(tiles)):
         o = tiles[j]
-        check = t.matched_edges(o)
+        check = len(t.match_edges(o))
         matches[t.tile_id] += check
         matches[o.tile_id] += check
 
