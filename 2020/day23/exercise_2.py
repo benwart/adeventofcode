@@ -11,25 +11,26 @@ full = Input("974618352", None)
 
 str_cup = lambda curr, i, cup: f"({str(cup)})" if curr == i else str(cup)
 
-cups = [int(cup) for cup in example1.value]
-cups.extend([i for i in range(max(cups) + 1, 1000000 + 1)])
-# stop = 10000000 + 1
-stop = 1000 + 1
 
-with progressbar.ProgressBar(max_value=stop) as bar:
+def simulate(input, max_value=1000000, stop=10000000, bar=None):
+    stop += 1
+    max_value += 1
+
+    cups = [int(cup) for cup in input]
+    cups.extend([i for i in range(max(cups) + 1, max_value)])
+
     curr = 0
-    max_value = 1000000 + 1
     for move in range(1, stop):
 
         # pickup 3 cups
         pickup = []
-        for p in range(3):
+        for _ in range(3):
             i = (curr + 1) % len(cups)
             if i < curr:
                 curr -= 1
             pickup.append(cups.pop(i))
 
-        # select next cup\
+        # select next cup
         dest = None
         look = cups[curr]
 
@@ -46,9 +47,17 @@ with progressbar.ProgressBar(max_value=stop) as bar:
             curr += 3
 
         curr = (curr + 1) % len(cups)
+        if bar:
+            bar.update(move)
 
-        bar.update(move)
+    # shift cups to get answer
+    start = cups.index(1)
+    print(prod(cups[i % len(cups)] for i in range(start + 1, start + 3)))
+    # print(f"cups: {' '.join([str_cup(curr, i, cup) for i, cup in enumerate(cups)])}")
 
-# shift cups to get answer
-start = cups.index(1)
-print(prod(cups[i % len(cups)] for i in range(start + 1, start + 3)))
+
+if __name__ == "__main__":
+    max_value = 1000000
+    stop = 1000
+    with progressbar.ProgressBar(max_value=stop) as bar:
+        simulate(example1.value, max_value=max_value, stop=stop, bar=bar)
