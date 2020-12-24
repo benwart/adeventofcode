@@ -71,7 +71,7 @@ def simulate(input, max_value=1000000, stop=10000000, bar=None):
 if __name__ == "__main__":
     max_value = 1000000
     stop = 10000000
-    with progressbar.ProgressBar(max_value=stop) as bar:
-        results = simulate(example1.value, max_value=max_value, stop=stop, bar=bar)
+    with progressbar.ProgressBar(max_value=stop + 1) as bar:
+        results = simulate(full.value, max_value=max_value, stop=stop, bar=bar)
 
     print(results)
