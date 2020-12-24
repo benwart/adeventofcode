@@ -2,6 +2,7 @@
 
 import progressbar
 from collections import namedtuple
+from linkedlist import DoubleLinkedList, ListNode
 from math import prod
 
 Input = namedtuple("Input", "value, answer")
@@ -9,55 +10,68 @@ Input = namedtuple("Input", "value, answer")
 example1 = Input("389125467", "67384529")
 full = Input("974618352", None)
 
-str_cup = lambda curr, i, cup: f"({str(cup)})" if curr == i else str(cup)
+
+def iter_links(head):
+    n = head
+    while n != None:
+        yield n.value
+        n = n.next
 
 
 def simulate(input, max_value=1000000, stop=10000000, bar=None):
     stop += 1
     max_value += 1
 
-    cups = [int(cup) for cup in input]
+    cups = list(map(int, input))
     cups.extend([i for i in range(max(cups) + 1, max_value)])
 
-    curr = 0
+    # convert to linkedlist
+    linked = DoubleLinkedList()
+    n = ListNode(linked, cups[0])
+    for cup in cups[1:]:
+        n = n.push(cup)
+
+    curr = linked.find(cups[0])
+
+    # make circular link
+    curr.prev, n.next = n, curr
+
     for move in range(1, stop):
 
         # pickup 3 cups
-        pickup = []
-        for _ in range(3):
-            i = (curr + 1) % len(cups)
-            if i < curr:
-                curr -= 1
-            pickup.append(cups.pop(i))
+        pickup = curr.remove(3)
 
         # select next cup
         dest = None
-        look = cups[curr]
+        look = curr.value
 
         while dest == None:
             look = (max_value + look - 1) % max_value
             if look not in pickup and look != 0:
-                dest = cups.index(look)
+                dest = linked.find(look)
 
         # insert picked up cups
-        cups[dest + 1 : dest + 1] = pickup
+        dest.insert(pickup.head, pickup.tail)
 
         # update curr
-        if dest < curr:
-            curr += 3
+        curr = curr.next
 
-        curr = (curr + 1) % len(cups)
         if bar:
             bar.update(move)
 
     # shift cups to get answer
-    start = cups.index(1)
-    print(prod(cups[i % len(cups)] for i in range(start + 1, start + 3)))
-    # print(f"cups: {' '.join([str_cup(curr, i, cup) for i, cup in enumerate(cups)])}")
+    output = linked.find(1).remove(2)
+    # return f"{''.join(map(str, iter_links(output.head)))}"
+
+    return prod(iter_links(output.head))
+
+    # print(prod(cups[i % len(cups)] for i in range(start + 1, start + 3)))
 
 
 if __name__ == "__main__":
     max_value = 1000000
-    stop = 1000
+    stop = 10000000
     with progressbar.ProgressBar(max_value=stop) as bar:
-        simulate(example1.value, max_value=max_value, stop=stop, bar=bar)
+        results = simulate(example1.value, max_value=max_value, stop=stop, bar=bar)
+
+    print(results)
