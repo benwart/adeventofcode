@@ -3,14 +3,19 @@
 from collections import defaultdict
 from parser import parse_input
 
-tiles = defaultdict(lambda: "white")
 
-for direction in parse_input("./data/full"):
-    coords = tuple(
-        sum(i) for i in zip(*[t for t in map(lambda d: d.transform, direction)])
-    )
-    tiles[coords] = "black" if tiles[coords] == "white" else "white"
+def exercise_1(filepath):
+    tiles = defaultdict(lambda: "white")
 
-flipped = [side for side in tiles.values() if side == "black"]
+    for direction in parse_input(filepath):
+        coords = tuple(
+            sum(i) for i in zip(*[t for t in map(lambda d: d.transform, direction)])
+        )
+        tiles[coords] = "black" if tiles[coords] == "white" else "white"
 
-print(f"Count of Tiles to Flip: {len(flipped)}")
+    return {coords: side for coords, side in tiles.items() if side == "black"}
+
+
+if __name__ == "__main__":
+    flipped = exercise_1("./data/full")
+    print(f"Count of Tiles to Flip: {len(flipped)}")
