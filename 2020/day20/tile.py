@@ -31,20 +31,6 @@ class Edge:
 Edges = namedtuple("Edges", "top bottom left right")
 
 
-def swap_key_value(d):
-    return {v: k for k, v in d.items()}
-
-
-def get_edges(tile_id, image):
-    name_edge = {
-        "top": Edge(tile_id, image[0]),
-        "bottom": Edge(tile_id, image[-1]),
-        "left": Edge(tile_id, image[:, 0]),
-        "right": Edge(tile_id, image[:, -1]),
-    }
-    return name_edge
-
-
 print_mapping = {0: ".", 1: "#"}
 print_keys = {"int": lambda n: print_mapping[n]}
 
@@ -60,14 +46,30 @@ class Tile:
         self.tile_id = int(tile_id)
         self.raw = np.array(image)
         self.image = self.raw[:]
-        self.cropped = self.image[1:-1, 1:-1]
-
-        # initial edges, will change with transforms
-        self.update_edges()
 
         # set of edges will never change as this is used to
         # determine matches with other images
-        self.edges = set(self.edge_name.keys())
+        self.edges = set([self.right, self.top, self.left, self.bottom])
+
+    @property
+    def right(self):
+        return Edge(self.tile_id, self.image[:, -1])
+
+    @property
+    def top(self):
+        return Edge(self.tile_id, self.image[0])
+
+    @property
+    def left(self):
+        return Edge(self.tile_id, self.image[:, 0])
+
+    @property
+    def bottom(self):
+        return Edge(self.tile_id, self.image[-1])
+
+    @property
+    def cropped(self):
+        return self.image[1:-1, 1:-1]
 
     def __repr__(self):
         return f"{self.tile_id}"
@@ -78,24 +80,31 @@ class Tile:
     def print(self):
         print_array(self.image)
 
-    def update_edges(self):
-        self.name_edge = get_edges(self.tile_id, self.image)
-        self.edge_name = swap_key_value(self.name_edge)
-
     def match_edges(self, other):
         return self.edges.intersection(other.edges)
 
     def get_matching_edge(self, other):
-        matches = [e for e in self.edges if e == other]
-        assert len(matches) > 0
-        return matches[0]
+        return {
+            self.right: self.right,
+            self.top: self.top,
+            self.left: self.left,
+            self.bottom: self.bottom,
+        }[other]
 
     def get_matching_side(self, other):
-        match = [self.get_matching_edge(e) for e in self.match_edges(other)][0]
-        return self.edge_name[match]
+        return {
+            self.right: "right",
+            self.top: "top",
+            self.left: "left",
+            self.bottom: "bottom",
+        }[other]
 
     def apply_transform(self, transforms):
         for t in transforms:
             self.image = t(self.image)
 
-        self.update_edges()
+
+if __name__ == "__main__":
+    from parser import parse_input
+
+    tiles = [t for t in parse_input("./data/example1")]

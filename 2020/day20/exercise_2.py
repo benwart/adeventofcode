@@ -3,8 +3,9 @@
 import numpy as np
 from collections import defaultdict
 from collections import namedtuple
-from math import sqrt
+from math import prod, sqrt
 from parser import parse_input
+from tile import print_array
 
 MatchEdge = namedtuple("MatchEdge", "tile edge")
 TileMatches = namedtuple("TileMatches", "tile matches")
@@ -35,30 +36,27 @@ transform_reverse = {
 
 
 transforms_sides = {
-    "top-top": [np.flipud],
-    "top-right": [lambda m: np.rot90(m, k=3), np.fliplr],
+    "top-top": [lambda m: np.rot90(m, k=2)],
+    "top-right": [lambda m: np.rot90(m, k=3)],
     "top-left": [lambda m: np.rot90(m, k=1)],
     "right-top": [lambda m: np.rot90(m, k=1)],
-    "right-right": [np.fliplr],
-    "right-bottom": [lambda m: np.rot90(m, k=3), np.flipud],
+    "right-right": [lambda m: np.rot90(m, k=2)],
+    "right-bottom": [lambda m: np.rot90(m, k=3)],
     "bottom-right": [lambda m: np.rot90(m, k=1)],
-    "bottom-bottom": [np.flipud],
-    "bottom-left": [lambda m: np.rot90(m, k=3), np.fliplr],
+    "bottom-bottom": [lambda m: np.rot90(m, k=2)],
+    "bottom-left": [lambda m: np.rot90(m, k=3)],
     "left-top": [lambda m: np.rot90(m, k=1)],
-    "left-bottom": [lambda m: np.rot90(m, k=3), np.flipud],
-    "left-left": [np.fliplr],
+    "left-bottom": [lambda m: np.rot90(m, k=3)],
+    "left-left": [lambda m: np.rot90(m, k=2)],
 }
 
 
-def calculate_transforms(static_side, other_side, reversed):
+def calculate_transforms(static_side, other_side):
     transforms = []
     key = f"{static_side}-{other_side}"
 
     if key in transforms_sides:
         transforms += transforms_sides[key]
-
-    if reversed:
-        transforms.append(transform_reverse[static_side])
 
     return transforms
 
@@ -66,7 +64,7 @@ def calculate_transforms(static_side, other_side, reversed):
 def transform_first_corner(tile, matches):
     for m in matches:
         edge = tile.get_matching_edge(m.edge)
-        side = tile.edge_name[edge]
+        side = tile.get_matching_side(edge)
 
         debug = [side]
         if side == "top":
@@ -80,35 +78,48 @@ def transform_first_corner(tile, matches):
 
 
 def find_side_tile(tile_matches, side):
-    global remaining
+    tile, matches = tile_matches
+    side_tile = {tile.get_matching_side(match.edge): match for match in matches}
 
-    side_tile = {
-        tile_matches.tile.get_matching_side(match.tile): match
-        for match in tile_matches.matches
-    }
+    # print(f"{tile}: {side_tile}")
 
     return side_tile[side] if side in side_tile else None
 
 
 def place_side_tile(coords, current, side):
+    global matches
+    global remaining
+
     match_side = find_side_tile(current, side)
-    if match_side:
-        cedge = current.tile.get_matching_edge(match_side.edge)
-        oedge = match_side.tile.get_matching_edge(match_side.edge)
+    if match_side and match_side.tile in remaining:
+        tile, edge = match_side
+        cedge = current.tile.get_matching_edge(edge)
+        oside = tile.get_matching_side(edge)
 
-        oside = match_side.tile.edge_name[oedge]
-        rev = cedge.reversed(oedge)
+        transforms = calculate_transforms(side, oside)
+        tile.apply_transform(transforms)
 
-        transforms = calculate_transforms(side, oside, rev)
-        match_side.tile.apply_transform(transforms)
+        oside = tile.get_matching_side(edge)
+
+        # check for reversed edge
 
         if side == "right":
+            oedge = tile.left
             ocoords = Coordinates(y=coords.y, x=coords.x + 1)
         else:
+            oedge = tile.top
             ocoords = Coordinates(y=coords.y + 1, x=coords.x)
 
-        mosaic_layout[ocoords.y, ocoords.x] = match_side.tile.tile_id
-        place_tiles(ocoords, TileMatches(match_side.tile, matches[match_side.tile]))
+        # now that we have the sides matched up reverse the new side if needed
+        rev = oedge.reversed(cedge)
+        if rev:
+            tile.apply_transform([transform_reverse[side]])
+
+        mosaic_layout[ocoords.y, ocoords.x] = tile.tile_id
+
+        # print(mosaic_layout)
+
+        place_tiles(ocoords, TileMatches(tile, matches[tile]))
 
 
 def place_tiles(coords, current):
@@ -121,40 +132,55 @@ def place_tiles(coords, current):
     place_side_tile(coords, current, "bottom")
 
 
-tiles = [t for t in parse_input("./data/example1")]
+tiles = {t.tile_id: t for t in parse_input("./data/example1")}
+
 side_length = int(sqrt(len(tiles)))
-matches = match_edges(tiles)
+matches = match_edges(list(tiles.values()))
 
 # keep track of tiles that haven't been added to layout
 remaining = set(matches.keys())
 mosaic_layout = np.zeros((side_length, side_length))
-
-# debugging
-
-# test = [t for t in tiles if t.tile_id == 1171][0]
-# ms = matches[test]
-# match = TileMatches(test, ms)
-# right = find_side_tile(match, "right")
-# print(right)
-# test.apply_transform([lambda m: np.rot90(m, k=2)])
-# right = find_side_tile(match, "right")
-# print(right)
-
 
 # need to find a corner and transform (starting in upper left)
 corners = [
     TileMatches(t, matches) for t, matches in matches.items() if len(matches) == 2
 ]
 current = corners[0]
-current_coors = Coordinates(0, 0)
+current_coords = Coordinates(0, 0)
 transform_first_corner(*current)
 
-# how big is the mosaic...do I care?
-
-mosaic_layout[current_coors.y, current_coors.x] = current.tile.tile_id
+mosaic_layout[current_coords.y, current_coords.x] = current.tile.tile_id
 
 place_tiles(Coordinates(0, 0), current)
 
-print(mosaic_layout)
+print(mosaic_layout, "\n")
 
-# # generate full mosaic image
+# generate full mosaic image
+
+# all the tiles should be transformed to final layout orientations
+cropped_shape = Coordinates(*list(tiles.values())[0].cropped.shape)
+mosaic_layout_shape = Coordinates(*mosaic_layout.shape)
+
+dims = [
+    cropped_shape,
+    mosaic_layout_shape,
+]
+
+mosaic_shape = Coordinates(*(prod(i) for i in zip(*(d for d in dims))))
+
+print(mosaic_shape, "\n")
+mosaic = np.zeros(mosaic_shape, dtype=np.int)
+
+for y, row in enumerate(mosaic_layout):
+    y_start = y * cropped_shape.y
+    y_end = y_start + cropped_shape.y
+
+    for x, col in enumerate(row):
+        x_start = x * cropped_shape.x
+        x_end = x_start + cropped_shape.x
+
+        window = mosaic[y_start:y_end, x_start:x_end]
+        window[:8, :8] = tiles[mosaic_layout[y, x]].cropped
+
+
+print_array(mosaic)
