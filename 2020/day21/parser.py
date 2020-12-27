@@ -12,17 +12,16 @@ RECIPE_REGEX = re.compile(
 )
 
 
-def parse_food(i, line):
+def parse_food(line):
     m = RECIPE_REGEX.match(line)
     d = m.groupdict()
 
     return {
-        "id": i,
         "ingredients": d["ingredients"].strip().split(" "),
         "allergens": re.split(", ", d["allergens"].strip()),
     }
 
 
 def parse_foods(filepath):
-    for i, line in enumerate(parse_lines(filepath)):
-        yield parse_food(i, line)
+    for line in parse_lines(filepath):
+        yield parse_food(line)
