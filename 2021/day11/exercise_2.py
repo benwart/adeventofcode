@@ -51,12 +51,6 @@ def flash_neighbors(p: Point, data: np.array):
         data[n.y, n.x] += 1
 
 
-def new_flashes(data: np.array, flashes: set):
-
-
-    return False
-
-
 data:np.array = parse_table("./2021/day11/data/full")
 
 print(f"Before any steps:")
@@ -106,8 +100,3 @@ for iteration in range(0,1000):
         print(f"Found all zeros at iteration: {iteration+1}")
         print(data)
         break
-
-    # print(f"\nAfter step {iteration+1}:")
-    # print(data)
-
-# print(f"total flashes: {total_flashes}")
