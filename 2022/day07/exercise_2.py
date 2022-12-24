@@ -35,6 +35,7 @@ class Directory:
     path: Path
     subdirs: list["Directory"] = field(default_factory=list)
     files: list[File] = field(default_factory=list)
+    listed: bool = False
 
     def __hash__(self) -> int:
         return hash(self.path)
@@ -105,7 +106,7 @@ def parse_console(filepath: str):
                     parent = directories[cwd]
 
                 case CommandType.LS:
-                    pass
+                    directories[cwd].listed = True
 
             # print(f"{cwd} - {cmd_type} with {cmd_arg}")
 
@@ -127,9 +128,28 @@ def parse_console(filepath: str):
 
 def main():
     directories = parse_console("2022/day07/data/full")
+    root = directories[Path("/")]
 
-    print_dir_tree(directories[Path("/")])
-    print(sum([dir.size() for dir in directories.values() if dir.size() <= 100000]))
+    # print_dir_tree(root)
+
+    total_device_size = 70000000
+    upgrade_space_size = 30000000
+    delta_to_upgrade_size = upgrade_space_size - (total_device_size - root.size())
+
+    print(f"total used space = {root.size()}")
+    print(f"total device space = {total_device_size}")
+    print(f"upgrade space needed = {upgrade_space_size}")
+    print(f"delta to be able to upgrade = {delta_to_upgrade_size}")
+
+    large_dirs = [
+        dir for dir in directories.values() if dir.size() >= delta_to_upgrade_size
+    ]
+    large_dirs.sort(key=lambda d: d.size())
+    # for dir in large_dirs:
+    #     print(f"{dir.path}: {dir.size()} (delta: {dir.size() - delta_to_upgrade_size})")
+
+    dir = large_dirs[0]
+    print(f"{dir.path}: {dir.size()} (delta: {dir.size() - delta_to_upgrade_size})")
 
 
 if __name__ == "__main__":
