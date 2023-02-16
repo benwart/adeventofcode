@@ -1,4 +1,5 @@
 import re
+import numpy as np
 from parser import parse_input
 from wire import Literal, Wire
 from gate import AND, OR, NOT, RSHIFT, LSHIFT
@@ -25,15 +26,15 @@ def get_literal_or_wire(a):
     raise ValueError(f"'{a}' is not a number of letters.")
 
 
-def literal(literal, output):
-    l = get_literal_or_wire(literal)
+def literal(literal_value, output):
+    l = get_literal_or_wire(literal_value)
     w = get_literal_or_wire(output)
 
     w.input = l
 
 
-def junction(input, output):
-    i = get_literal_or_wire(input)
+def junction(input_value, output):
+    i = get_literal_or_wire(input_value)
     w = get_literal_or_wire(output)
 
     w.input = i
@@ -71,22 +72,25 @@ setup = {
 
 wires = {}
 
-import numpy as np
-
 
 def to_uint16(value):
     return np.array([value], dtype="uint16")[0]
 
 
-for k, m in parse_input("./data/full"):
-    # print(k, m)
-    setup[k](**m)
+def main():
+    for k, m in parse_input("./data/full"):
+        # print(k, m)
+        setup[k](**m)
 
-for k in sorted(wires):
-    w = wires[k]
-    print(f"{k}: {to_uint16(w.value)}")
+    for k in sorted(wires):
+        w = wires[k]
+        print(f"{k}: {to_uint16(w.value)}")
 
-# print(f"Input to 'f': {wires['f'].value}")
-# print(f"123 << 2 = {123 << 2}")
+    # print(f"Input to 'f': {wires['f'].value}")
+    # print(f"123 << 2 = {123 << 2}")
 
-print(f"Input to 'a': {wires['a'].value}")
+    print(f"Input to 'a': {wires['a'].value}")
+
+
+if __name__ == "__main__":
+    main()

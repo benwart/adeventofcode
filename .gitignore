@@ -1,3 +1,5 @@
 __pycache__/
 *.pyc
 *.pstats
+.DS_Store
+.idea/
