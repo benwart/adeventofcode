@@ -75,12 +75,16 @@ def parse_draws(draws: str) -> Iterable[Draw]:
 def parse_games(filepath: Path) -> Iterable[Game]:
     for line in parse_lines(filepath):
         raw_game, raw_draws = [p.strip() for p in line.split(":")]
-        yield Game(line, int(raw_game.split(" ")[1]), list(parse_draws(raw_draws)))
+
+        game_number = int(raw_game.split(" ")[1])
+        draws = list(parse_draws(raw_draws))
+
+        yield Game(line, game_number, draws)
 
 
 if __name__ == "__main__":
-    sum = 0
+    total = 0
     for game in parse_games(Path("2023/day02/data/full")):
-        sum += game.power()
+        total += game.power()
 
-    print(f"Sum of game powers: {sum}")
+    print(f"Sum of game powers: {total}")
