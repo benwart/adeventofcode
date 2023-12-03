@@ -69,7 +69,7 @@ def main(filepath: Path):
 
     total = 0
     for marker in markers:
-        if len(marker.gears) > 1:
+        if len(marker.gears) == 2:
             # print(marker.gears)
             total += marker.ratio()
         elif len(marker.gears) > 2:
