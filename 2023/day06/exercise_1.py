@@ -32,8 +32,8 @@ def parse_races(filepath: Path) -> list[Race]:
 
 
 def calculate_winning_race_distances(race: Race) -> int:
-    distances = [(t * (race.time - t)) - race.distance for t in range(1, race.time)]
-    return len([d for d in distances if d > 0])
+    records = [t for t in range(1, race.time) if t * (race.time - t) > race.distance]
+    return len(records)
 
 
 def main(filepath: Path):
