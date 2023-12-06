@@ -11,7 +11,8 @@ def parse_lines(filepath: Path) -> Iterable[str]:
 
 
 def main(filepath: Path):
-    print(filepath)
+    for line in parse_lines(filepath):
+        print(line)
 
 
 if __name__ == "__main__":
