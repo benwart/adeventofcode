@@ -8,13 +8,13 @@ from typing import Iterable
 
 
 class HandQuality(IntEnum):
-    FIVE_OF_A_KIND = 1
-    FOUR_OF_A_KIND = 2
-    FULL_HOUSE = 3
+    FIVE_OF_A_KIND = 7
+    FOUR_OF_A_KIND = 6
+    FULL_HOUSE = 5
     THREE_OF_A_KIND = 4
-    TWO_PAIR = 5
-    ONE_PAIR = 6
-    HIGH_CARD = 7
+    TWO_PAIR = 3
+    ONE_PAIR = 2
+    HIGH_CARD = 1
 
 
 class CardValue(IntEnum):
@@ -50,7 +50,7 @@ char_to_card = {
 }
 
 
-def calculate_hand_quality(cards: list[str]) -> HandQuality:
+def calculate_hand_quality(cards: list[CardValue]) -> HandQuality:
     grouped_cards = defaultdict(int)
     for c in cards:
         grouped_cards[c] += 1
@@ -86,7 +86,7 @@ class Hand:
 
     def __gt__(self, other: "Hand"):
         if self.quality != other.quality:
-            return self.quality < other.quality
+            return self.quality > other.quality
 
         else:
             for i in range(len(self.cards)):
@@ -100,7 +100,7 @@ def parse_lines(filepath: Path) -> Iterable[str]:
             yield line.strip()
 
 
-def parse_hands(filepath: Path) -> Iterable[str]:
+def parse_hands(filepath: Path) -> Iterable[Hand]:
     for line in parse_lines(filepath):
         cards, bid = line.split(" ")
         yield Hand([char_to_card[c] for c in cards], int(bid))
