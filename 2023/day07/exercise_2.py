@@ -120,10 +120,6 @@ def parse_hands(filepath: Path) -> Iterable[str]:
 def main(filepath: Path):
     hands = list(parse_hands(filepath))
     ranked = sorted(hands)
-
-    for hand in ranked:
-        print(f"{hand.cards} {hand.bid} {hand.quality.name}")
-
     total = sum((index + 1) * hand.bid for index, hand in enumerate(ranked))
 
     print(f"Sum of winnings: {total}")
