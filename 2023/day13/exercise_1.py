@@ -37,51 +37,24 @@ def parse_maps(filepath: Path) -> Iterable[Map]:
     yield Map(grid)
 
 
-def horizontal_mirrors(map: Map) -> Optional[list[int]]:
+def transpose(grid: list[str]) -> list[str]:
+    transposed = []
+    width = len(grid[0])
+    height = len(grid)
+
+    for x in range(width):
+        transposed.append("".join(grid[y][x] for y in range(height)))
+
+    return transposed
+
+
+def mirrors(grid: list[str], width: int, height: int) -> Optional[list[int]]:
     pairs = []
 
-    for ri in range(1, map.width):
-        li = ri - 1
-        left = "".join(map.grid[y][li] for y in range(map.height))
-        right = "".join(map.grid[y][ri] for y in range(map.height))
-
-        if left == right:
-            pairs.append((li, ri))
-
-    match = False
-
-    for ai, bi in pairs:
-        match = True
-        li = ai
-        ri = bi
-
-        while match:
-            li -= 1
-            ri += 1
-
-            if li < 0 or ri >= map.width:
-                break
-
-            left = "".join(map.grid[y][li] for y in range(map.height))
-            right = "".join(map.grid[y][ri] for y in range(map.height))
-
-            if left != right:
-                match = False
-                break
-
-        if match:
-            return bi
-
-    return None
-
-
-def vertical_mirrors(map: Map) -> Optional[list[int]]:
-    pairs = []
-
-    for bi in range(1, map.height):
+    for bi in range(1, height):
         ti = bi - 1
-        top = map.grid[ti]
-        bottom = map.grid[bi]
+        top = grid[ti]
+        bottom = grid[bi]
 
         if top == bottom:
             pairs.append((ti, bi))
@@ -97,11 +70,11 @@ def vertical_mirrors(map: Map) -> Optional[list[int]]:
             ti -= 1
             bti += 1
 
-            if ti < 0 or bti >= map.height:
+            if ti < 0 or bti >= height:
                 break
 
-            top = map.grid[ti]
-            bottom = map.grid[bti]
+            top = grid[ti]
+            bottom = grid[bti]
 
             if top != bottom:
                 match = False
@@ -119,15 +92,13 @@ def main(filepath: Path):
         # print("--------------------------------")
         # print(map)
         mirror = 0
-        h = horizontal_mirrors(map)
-        if h:
-            mirror = h
-            # print(f"Horizontal mirror: {h} found")
+        v = mirrors(map.grid, map.width, map.height)
+        if v:
+            mirror = v * 100
         else:
-            v = vertical_mirrors(map)
-            if v:
-                mirror = v * 100
-                # print(f"Vertical mirror: {v} found")
+            h = mirrors(transpose(map.grid), map.height, map.width)
+            if h:
+                mirror = h
             else:
                 print("No mirror found")
 
