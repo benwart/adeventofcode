@@ -36,7 +36,7 @@ class Instruction:
         return f"Instruction[{str(self)}]"
 
     def __str__(self) -> str:
-        return f"{self.direction} {self.steps} ({self.color})"
+        return f"{self.direction} {self.steps}"
 
 
 def parse_lines(filepath: Path) -> Iterable[str]:
