@@ -25,6 +25,10 @@ class Brick:
 
     def __str__(self) -> str:
         return f"{"~".join([str(corner) for corner in self.corners])} - {self.box}, {self.top}, {self.bottom}"
+    
+
+    def overlap(self, other: "Brick") -> bool:
+        return self.box.intersects(other.box)   
 
 
 def parse_lines(filepath: Path) -> Iterable[str]:
@@ -38,12 +42,42 @@ def parse_bricks(filepath: Path) -> Iterable[Brick]:
         points = line.strip().split("~")
         yield Brick([Point(p.strip().split(",")) for p in points])
 
+def condense(bricks: list[Brick]) -> list[Brick]:
+    done = False
+    loops = 0
+    while not done:
+        movement = False
+        loops += 1
+        for i, brick in enumerate(bricks[:-1]):
+            shifted = False
+            for below in bricks[i+1:]:
+                if brick.overlap(below):
+                    # print(f"{brick} overlaps {below}")
+                    shift = brick.bottom - below.top
+                    brick.bottom -= shift
+                    brick.top -= shift
+                    shifted = True
+                    movement = movement or shift > 0
+                    break
+            
+            if not shifted:
+                # no overlapping bricks found
+                shift = brick.bottom - brick.bottom
+                brick.bottom -= shift
+                brick.top -= shift
+                movement = movement or shift > 0
+
+        done = not movement
+
+    return bricks
+            
 
 def main(filepath: Path):
-    bricks = list(parse_bricks(filepath))
+    bricks = sorted(parse_bricks(filepath), reverse=True, key=lambda b: b.bottom)
+    bricks = condense(bricks)
     for brick in bricks:
         print(brick)
-
+    
 
 if __name__ == "__main__":
-    main(Path(__file__).parent / "data" / "example_1")
+    main(Path(__file__).parent / "data" / "full")
