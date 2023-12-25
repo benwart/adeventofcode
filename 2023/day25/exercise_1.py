@@ -46,8 +46,8 @@ def main(filepath: Path):
     # count nodes in clusters
     a, b = connected_components(graph)
 
-    # draw_spring(graph, with_labels=True)
-    # show()
+    draw_spring(graph, with_labels=True)
+    show()
     print("Part 1:", len(a) * len(b))
 
 
