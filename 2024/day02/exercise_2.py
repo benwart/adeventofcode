@@ -42,6 +42,19 @@ def check_variations(report: list[int]) -> bool:
     return False
 
 def main(filepath: Path):
+    """
+    Reads a file of reports, counts the number of safe reports, and prints it.
+
+    A report is safe if it is either all increasing or all decreasing, and any two
+    adjacent levels differ by at least one and at most three.
+
+    If a report is not safe, it checks all variations of the report which are
+    the same but for one level removed. If any variation is safe, then the
+    original report is considered safe.
+
+    :param filepath: The file to read.
+    :type filepath: Path
+    """
     count: int = 0
     for report in parse_reports(filepath):
         safe: bool = check_report(report)

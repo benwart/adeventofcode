@@ -37,6 +37,13 @@ def check_report(report: list[int]) -> bool:
 
 
 def main(filepath: Path):
+    """
+    Print the number of valid reports in a file.
+
+    A valid report is a list of integers which are either all increasing or all
+    decreasing, and any two adjacent values differ by at least one and at most
+    three.
+    """
     count: int = 0
     for report in parse_reports(filepath):
         safe: bool = check_report(report)
