@@ -3,3 +3,4 @@ __pycache__/
 *.pstats
 .DS_Store
 .idea/
+**/data/full*
