@@ -42,8 +42,8 @@ def get_cheats(map: list[list[str]]) -> Iterable[list[tuple[int, int, str]]]:
 
     for y, row in enumerate(map[1:-1], start=1):
         for x, c in enumerate(row[1:-1], start=1):
-    #         if c == "#" and ((map[y][x - 1] == "." and map[y][x + 1] == ".") or (map[y - 1][x] == "." and map[y + 1][x] == ".")):
-    #             yield (x, y)
+            if c == "#" and ((map[y][x - 1] == "." and map[y][x + 1] == ".") or (map[y - 1][x] == "." and map[y + 1][x] == ".")):
+                yield (x, y)
 
 
 def get_path(map: list[list[str]], start: tuple[int, int], end: tuple[int, int]) -> list[tuple[int, int]]:
